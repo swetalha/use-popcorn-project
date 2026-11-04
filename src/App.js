@@ -79,15 +79,8 @@ function NumResult({ movies }) {
   );
 }
 
-function NavBar({ movies }) {
-  const [query, setQuery] = useState("");
-  return (
-    <nav className="nav-bar">
-      <Logo />
-      <Search query={query} setQuery={setQuery} />
-      <NumResult movies={movies} />
-    </nav>
-  );
+function NavBar({ children }) {
+  return <nav className="nav-bar">{children}</nav>;
 }
 
 function Movie({ movie }) {
@@ -112,21 +105,6 @@ function MovieList({ movies }) {
         <Movie movie={movie} />
       ))}
     </ul>
-  );
-}
-
-function ListBox({ movies }) {
-  const [isOpen1, setIsOpen1] = useState(true);
-  return (
-    <div className="box">
-      <button
-        className="btn-toggle"
-        onClick={() => setIsOpen1((open) => !open)}
-      >
-        {isOpen1 ? "–" : "+"}
-      </button>
-      {isOpen1 && <MovieList movies={movies} />}
-    </div>
   );
 }
 
@@ -192,42 +170,42 @@ function WatchedMovieList({ watched }) {
   );
 }
 
-function WatchBox() {
-  const [watched, setWatched] = useState(tempWatchedData);
-  const [isOpen2, setIsOpen2] = useState(true);
+function Box({ children }) {
+  const [isOpen, setIsOpen] = useState(true);
   return (
     <div className="box">
-      <button
-        className="btn-toggle"
-        onClick={() => setIsOpen2((open) => !open)}
-      >
-        {isOpen2 ? "–" : "+"}
+      <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
+        {isOpen ? "–" : "+"}
       </button>
-      {isOpen2 && (
-        <>
-          <WatchSummary watched={watched} />
-          <WatchedMovieList watched={watched} />
-        </>
-      )}
+      {isOpen && <>{children}</>}
     </div>
   );
 }
 
-function Main({ movies }) {
-  return (
-    <main className="main">
-      <ListBox movies={movies} />
-      <WatchBox />
-    </main>
-  );
+function Main({ children }) {
+  return <main className="main">{children}</main>;
 }
 
 export default function App() {
+  const [query, setQuery] = useState("");
   const [movies, setMovies] = useState(tempMovieData);
+  const [watched, setWatched] = useState(tempWatchedData);
   return (
     <>
-      <NavBar movies={movies} />
-      <Main movies={movies} />
+      <NavBar>
+        <Logo />
+        <Search query={query} setQuery={setQuery} />
+        <NumResult movies={movies} />
+      </NavBar>
+      <Main>
+        <Box>
+          <MovieList movies={movies} />
+        </Box>
+        <Box>
+          <WatchSummary watched={watched} />
+          <WatchedMovieList watched={watched} />
+        </Box>
+      </Main>
     </>
   );
 }
