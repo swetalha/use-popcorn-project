@@ -24,7 +24,9 @@ export default function StarRating({ maxRating = 5 }) {
           />
         ))}
       </div>
-      <p className="m-0">{tempRating || rating || ""}</p>
+      <p className="m-0 text-[#ffff31] text-[26px] font-[500]">
+        {tempRating || rating || ""}
+      </p>
     </div>
   );
 }
