@@ -189,7 +189,15 @@ function Main({ children }) {
 }
 
 function Loader() {
-  return <p>Just a minute ...</p>;
+  return <p className="loader">Just a minute ...</p>;
+}
+
+function ErrorMessage({ message }) {
+  return (
+    <p className="error">
+      <span>❌</span> {message}
+    </p>
+  );
 }
 
 export default function App() {
@@ -197,15 +205,25 @@ export default function App() {
   const [movies, setMovies] = useState(tempMovieData);
   const [watched, setWatched] = useState(tempWatchedData);
   const [isLoading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(function () {
     async function getMovie(filmName) {
-      setLoading(true);
-      const apiRequestMovie = `http://www.omdbapi.com/?s=${filmName}&apikey=${API_KEY}`;
-      const request = await fetch(apiRequestMovie);
-      const result = await request.json();
-      setMovies(result.Search);
-      setLoading(false);
+      try {
+        setLoading(true);
+        const apiRequestMovie = `http://www.omdbapi.com/?s=${filmName}&apikey=${API_KEY}`;
+        const request = await fetch(apiRequestMovie);
+        if (!request.ok) throw new Error("Something went wrong");
+        const result = await request.json();
+        if (result.Response === "False") throw new Error("Movie Not Found");
+        setMovies(result.Search);
+        setLoading(false);
+      } catch (err) {
+        console.log(err.message);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     }
     getMovie("Avengers");
   }, []);
@@ -218,7 +236,11 @@ export default function App() {
         <NumResult movies={movies} />
       </NavBar>
       <Main>
-        <Box>{isLoading ? <Loader /> : <MovieList movies={movies} />}</Box>
+        <Box>
+          {!isLoading && !error && <MovieList movies={movies} />}
+          {isLoading && <Loader />}
+          {error && <ErrorMessage message={error} />}
+        </Box>
         <Box>
           <WatchSummary watched={watched} />
           <WatchedMovieList watched={watched} />
